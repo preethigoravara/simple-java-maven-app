@@ -17,6 +17,9 @@
   </dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <sonar.projectKey>arjunachari12_maven-sample-devops</sonar.projectKey> <!-- Add this -->
+    <sonar.organization>arjunachari12</sonar.organization> <!-- Add this -->
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url> <!-- Add this -->
   </properties>
   <build>
     <pluginManagement>
@@ -43,6 +46,11 @@
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.9.1.2184</version> <!-- Check for the latest version -->
       </plugin>
     </plugins>
   </build>
