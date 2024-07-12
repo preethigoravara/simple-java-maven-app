@@ -1,5 +1,5 @@
-pipeline{
-    agent{
+pipeline {
+    agent {
         docker {
             image 'maven:3.8.1-adoptopenjdk-11'
             args '-v /root/.m2:/root/.m2'
@@ -8,93 +8,91 @@ pipeline{
     options {
         skipStagesAfterUnstable()
     }
-    stages{
-        stage("Build"){
-            steps{
+    stages {
+        stage("Build") {
+            steps {
                 echo "========Building Java project========"
                 sh 'mvn -B -DskipTests clean package'
             }
-            post{
-                always{
+            post {
+                always {
                     echo "========always========"
                 }
-                success{
-                    echo "========A executed successfully========"
+                success {
+                    echo "========Build executed successfully========"
                 }
-                failure{
-                    echo "========A execution failed========"
+                failure {
+                    echo "========Build execution failed========"
                 }
             }
         }
 
-        stage("Test"){
-            steps{
+        stage("Test") {
+            steps {
                 echo "====++++running Test++++===="
                 sh 'mvn test'
             }
-            post{
-                always{
+            post {
+                always {
                     echo "====++++always++++===="
                     junit "target/surefire-reports/*.xml"
                 }
-                success{
+                success {
                     echo "====++++Test executed successfully++++===="
                 }
-                failure{
+                failure {
                     echo "====++++Test execution failed++++===="
                 }
-        
             }
         }
 
-        stage("Sonarqube Analysis"){
-            steps{
+        stage("Sonarqube Analysis") {
+            steps {
                 echo "====++++executing Sonarqube Analysis++++===="
                 withSonarQubeEnv('SonarQube') {
-                sh 'mvn sonar:sonar'
+                    sh 'mvn sonar:sonar'
+                }
             }
-            }
-            post{
-                always{
+            post {
+                always {
                     echo "====++++always++++===="
                 }
-                success{
+                success {
                     echo "====++++Sonarqube Analysis executed successfully++++===="
                 }
-                failure{
+                failure {
                     echo "====++++Sonarqube Analysis execution failed++++===="
                 }
-        
             }
         }
 
-        stage("Deploy"){
-            steps{
+        stage("Deploy") {
+            steps {
                 echo "====++++executing Deploy++++===="
                 sh './jenkins/scripts/deliver.sh'
             }
-            post{
-                always{
+            post {
+                always {
                     echo "====++++always++++===="
                 }
-                success{
+                success {
                     echo "====++++Deploy executed successfully++++===="
                 }
-                failure{
+                failure {
                     echo "====++++Deploy execution failed++++===="
                 }
-        
             }
         }
     }
-    post{
-        always{
+
+    post {
+        always {
             echo "========always========"
         }
-        success{
+        success {
             echo "========pipeline executed successfully ========"
         }
-        failure{
+        failure {
             echo "========pipeline execution failed========"
         }
     }
