@@ -1,43 +1,47 @@
-name: Maven CI/CD
+name: Maven Build, Test, and Deliver
 
 on:
   push:
     branches:
-      - main
+      - main  # You can change this to your preferred branch
   pull_request:
     branches:
-      - main
+      - main  # You can change this to your preferred branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: maven:3.9.0
-      options: --user root
-
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Maven Cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: maven-
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'  # Adjust the version as needed
 
-      - name: Build Application
-        run: mvn -B -DskipTests clean package
+    - name: Cache Maven dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
 
-      - name: Run Tests
-        run: mvn test
+    - name: Build with Maven
+      run: mvn -B -DskipTests clean package
 
-      - name: Publish Test Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-reports
-          path: target/surefire-reports/*.xml
+    - name: Run Tests
+      run: mvn test
 
-      - name: Deploy (if needed)
-        run: ./jenkins/scripts/deliver.sh
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: target/surefire-reports/*.xml
+
+    - name: Deliver Application
+      run: ./jenkins/scripts/deliver.sh
 
