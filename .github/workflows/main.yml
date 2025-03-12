@@ -1,0 +1,64 @@
+name: Maven Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Set up Docker with Maven image
+      - name: Set up Docker container
+        uses: addnab/docker-run-action@v3
+        with:
+          image: maven:3-alpine
+          options: -v /root/.m2:/root/.m2
+          run: |
+            # Build the project
+            mvn -B -DskipTests clean package
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker container
+        uses: addnab/docker-run-action@v3
+        with:
+          image: maven:3-alpine
+          options: -v /root/.m2:/root/.m2
+          run: |
+            # Run tests
+            mvn test
+
+      # Upload JUnit test reports as artifacts
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-report
+          path: target/surefire-reports/*.xml
+
+  deliver:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Deliver Script
+        run: ./jenkins/scripts/deliver.sh
