@@ -1,44 +1,43 @@
 name: Maven CI/CD
- 
-on:
-   push:
-     branches:
-       - main
-   pull_request:
-     branches:
-       - main
- 
- jobs:
-   build:
-     runs-on: ubuntu-latest
-     container:
-       image: maven:3.9.0
-       options: --user root
- 
-     steps:
-       - name: Checkout Repository
-         uses: actions/checkout@v3
- 
-       - name: Set up Maven Cache
-         uses: actions/cache@v3
-         with:
-           path: ~/.m2
-           key: maven-${{ hashFiles('**/pom.xml') }}
-           restore-keys: maven-
- 
-       - name: Build Application
-         run: mvn -B -DskipTests clean package
- 
-       - name: Run Tests
-         run: mvn test
- 
-       - name: Publish Test Results
-         uses: actions/upload-artifact@v3
-         with:
-           name: test-reports
-           path: target/surefire-reports/*.xml
- 
-       - name: Deploy (if needed)
-         run: ./jenkins/scripts/deliver.sh
 
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: maven:3.9.0
+      options: --user root
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Maven Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: maven-
+
+      - name: Build Application
+        run: mvn -B -DskipTests clean package
+
+      - name: Run Tests
+        run: mvn test
+
+      - name: Publish Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: target/surefire-reports/*.xml
+
+      - name: Deploy (if needed)
+        run: ./jenkins/scripts/deliver.sh
 
