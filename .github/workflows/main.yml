@@ -1,6 +1,6 @@
 name: Maven CI/CD
  
- on:
+on:
    push:
      branches:
        - main
